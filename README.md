@@ -39,17 +39,29 @@ cd repo
 
 
 ## Windows
-### Visual Studio
+### Visual Studio (CPU-only)
 
-- Support generation using CMake with below command
+From the Qiner folder, generate the solution and build:
 ```
-# Assume in Qiner folder
 mkdir build
 cd build
-"C:\Program Files\CMake\bin\cmake.exe" -G <Visual Studio Generator>
-# Example: C:\Program Files\CMake\bin\cmake.exe" -G "Visual Studio 17 2022"
+"C:\Program Files\CMake\bin\cmake.exe" -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
 ```
-- Open Qiner.sln in build folder and build
+Open `build\Qiner.sln` and build.
+
+### Hybrid / GPU build (Visual Studio + CUDA)
+
+To build with GPU support (hybrid: CPU threads + GPU addition mining), install the [NVIDIA driver and CUDA Toolkit](#requirement) first, then from the Qiner folder in **PowerShell**:
+
+```batch
+mkdir build
+cd build
+set CUDAToolkit_ROOT=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.1
+"C:\Program Files\CMake\bin\cmake.exe" .. -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release -DBUILD_TOOLS=ON -DBUILD_CUDA=ON -DCUDAToolkit_ROOT="%CUDAToolkit_ROOT%"
+```
+Open `build\Qiner.sln` and build **Release**. Run with CPU threads and GPU batch, e.g. `Qiner.exe <NodeIP> <Port> <MiningID> <SigningSeed> <MiningSeed> 4 256` (4 CPU threads, GPU batch 256).
+
+If CUDA is installed elsewhere, set `CUDAToolkit_ROOT` to that path (the folder containing `bin\nvcc.exe`).
 
 ### Enable AVX512
 - Open Qiner.sln
@@ -71,7 +83,7 @@ sudo apt-get update
 ```bash
 sudo apt-get install -y cuda-toolkit-13-1
 ```
-- Add to PATH (so nvcc is found)
+- Add to PATH
 ```bash
 echo 'export PATH=/usr/local/cuda-13.1/bin:$PATH' >> ~/.bashrc
 echo 'export LD_LIBRARY_PATH=/usr/local/cuda-13.1
@@ -86,7 +98,7 @@ sudo apt-get update
 sudo apt-get install -y build-essential cmake
 ```
 
-### GCC (CPU-only build, modern CPUs with AVX2)
+### GCC (CPU-only build)
 
 ```bash
 mkdir build && cd build
@@ -94,7 +106,7 @@ cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j$(nproc)
 ```
 
-### Clang (CPU-only build, modern CPUs with AVX2)
+### Clang (CPU-only build)
 
 ```bash
 mkdir build && cd build
@@ -133,6 +145,11 @@ From `build`:
 - **Verify:** Compares CPU vs GPU scores; expect `Verification PASSED`.
 
 # Run
+- Windows
+```
+Qiner.exe <Node IP> <Node Port> <MiningID> <Signing Seed> <Mining Seed> <Number of threads> <Batch Size(Optional)>
+```
+- Linux
 ```
 ./Qiner <Node IP> <Node Port> <MiningID> <Signing Seed> <Mining Seed> <Number of threads> <Batch Size(Optional)>
 ```

@@ -991,7 +991,7 @@ int score_addition_cuda_batch(
     if (!useLegacy)
     {
         // Parallel inferANN path: init/mutate/inferANN kernels, host loop over steps.
-        // Cache device buffers and reuse across batches (same numNonces) to avoid slow re-alloc every batch.
+        // Cache device buffers and reuse across batches (same numNonces).
         static size_t s_parallel_cached_numNonces = 0;
         static InitValueDevice* s_d_init_p = nullptr;
         static Neuron* s_d_neurons = nullptr;
@@ -1078,14 +1078,14 @@ int score_addition_cuda_batch(
             }
         }
 
-        // Progress: poll from host every 1s, print every 30s (no separate thread; avoids up-to-30s join delay).
+        // Progress: poll from host every 1s, print every 30s.
         auto t_parallel_start = std::chrono::steady_clock::now();
         cudaEvent_t e_batch_done = nullptr;
         if (numNonces > 8u) {
             err = cudaEventCreate(&e_batch_done);
             if (err != cudaSuccess) e_batch_done = nullptr;
             if (e_batch_done) {
-                std::fprintf(stderr, "[GPU] Kernel running (may take several minutes). Progress every 30 s.\n");
+                std::fprintf(stderr, "[GPU] Kernel start running.\n");
                 std::fflush(stderr);
             }
         }
